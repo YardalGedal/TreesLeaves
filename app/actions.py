@@ -31,7 +31,7 @@ async def new(db: motor_asyncio.AsyncIOMotorDatabase, text: str, parent: str or 
 
     await text.save()
 
-    return Ok(True)
+    return Ok(str(text.id))
 
 
 async def search(db: motor_asyncio.AsyncIOMotorDatabase, text: str) -> Result:
