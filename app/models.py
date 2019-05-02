@@ -46,35 +46,17 @@ class Object:
         def find_one(self, query: Optional[dict] = None, **kwargs):
             return self.collection.find_one(self.q(query, **kwargs))
 
-        def find(self, query: Optional[dict] = None, **kwargs):
-            return self.collection.find(self.q(query, **kwargs))
-
         def update_one(self, query: Optional[dict] = None, **search):
             def handler(data: dict = None, **kwargs):
                 return self.collection.update_one(self.q(query, **search), {'$set': self.q(data, **kwargs)})
 
             return handler
 
-        def update(self, query: Optional[dict] = None, **search):
-            def handler(data: Optional[dict] = None, **kwargs):
-                return self.collection.update_many(self.q(query, **search), {'$set': self.q(data, **kwargs)})
-
-            return handler
-
         def delete_one(self, query: Optional[dict] = None, **kwargs):
             return self.collection.delete_one(self.q(query, **kwargs))
 
-        def delete(self, query: Optional[dict] = None, **kwargs):
-            return self.collection.delete_many(self.q(query, **kwargs))
-
         def insert_one(self, query: Optional[dict] = None, **kwargs):
             return self.collection.insert_one(self.q(query, with_fields=True, **kwargs))
-
-        def insert(self, *args):
-            return self.collection.insert_many(*(self.q(i, with_fields=True) for i in args))
-
-        def count(self, query: Optional[dict] = None, **kwargs) -> int:
-            return self.collection.count_documents(self.q(query, **kwargs))
 
         async def create_indexes(self) -> list:
             return [await self.collection.create_index(k, **v) for k, v in self.INDEXES.items()]
@@ -89,9 +71,6 @@ class Object:
         async def object(self, *args, **kwargs) -> EasyDict:
             return EasyDict(await self.find_one(*args, **kwargs))
 
-        async def objects(self, *args, **kwargs) -> tuple:
-            return tuple(EasyDict(obj) for obj in await self.find(*args, **kwargs))
-
     def __init__(self, db: motor_asyncio.AsyncIOMotorDatabase, **kwargs):
         self.db = db
         self.model = self.Model(db, self.Model.__collection__ or self.__class__.__name__)
@@ -104,16 +83,6 @@ class Object:
     @property
     def id(self) -> ObjectId:
         return self.data.get('_id')
-
-    async def find(self, **kwargs) -> list:
-        objects = []
-
-        for data in await self.model.objects(**(kwargs or self.kwargs)):
-            obj = self.__class__(self.db)
-            obj.data = data.copy()
-            objects.append(obj)
-
-        return objects
 
     @object_action
     async def new(self) -> None:
