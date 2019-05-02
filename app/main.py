@@ -1,5 +1,7 @@
 import asyncio
 
+from typing import NoReturn
+
 from aiohttp import web
 from motor import motor_asyncio
 
@@ -17,7 +19,7 @@ ROUTES = [
 ]
 
 
-def run() -> None:
+def run() -> NoReturn:
     app = create_app(ROUTES)
     web.run_app(app, port=PORT, reuse_port=True)
 

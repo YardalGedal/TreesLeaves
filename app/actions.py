@@ -1,6 +1,8 @@
 import asyncio
 import bson.errors
 
+from typing import Union, Optional
+
 from bson import ObjectId
 from motor import motor_asyncio
 
@@ -10,7 +12,7 @@ from .models import Text
 __all__ = ['new', 'search', 'get']
 
 
-async def new(db: motor_asyncio.AsyncIOMotorDatabase, text: str, parent: str or ObjectId) -> Result:
+async def new(db: motor_asyncio.AsyncIOMotorDatabase, text: str, parent: Union[str, ObjectId]) -> Result:
     """
     as Result returns Error object TextNotPassed
     or Ok object with boolean value True
@@ -51,7 +53,7 @@ async def search(db: motor_asyncio.AsyncIOMotorDatabase, text: str) -> Result:
     return Ok([make_doc(i['_id'], i['text'], parents[n]) for n, i in enumerate(docs)])
 
 
-async def get(db: motor_asyncio.AsyncIOMotorDatabase, _id: str or ObjectId) -> Result:
+async def get(db: motor_asyncio.AsyncIOMotorDatabase, _id: Union[str, ObjectId]) -> Result:
     """
     as Result returns Error object NothingFound
     or Ok object, contains document and list of document parents
@@ -69,11 +71,13 @@ async def get(db: motor_asyncio.AsyncIOMotorDatabase, _id: str or ObjectId) -> R
     return Ok(make_doc(text.id, text.data.text, await get_parents(db, _obj=text)))
 
 
-def make_doc(_id: str or ObjectId, text: str, parents: list) -> dict:
+def make_doc(_id: Union[str, ObjectId], text: str, parents: list) -> dict:
     return dict(id=str(_id), text=text, parents=parents)
 
 
-async def get_parents(db: motor_asyncio.AsyncIOMotorDatabase, _id: str or ObjectId = None, _obj: Text = None) -> list:
+async def get_parents(db: motor_asyncio.AsyncIOMotorDatabase,
+                      _id: Optional[str, ObjectId] = None,
+                      _obj: Text = None) -> list:
     seq = []
 
     if _id:

@@ -1,6 +1,10 @@
+from typing import Callable
+from typing import Awaitable
+
 from aiohttp import web
 
 from . import actions
+from .results import Result
 
 __all__ = ['new', 'search', 'get']
 
@@ -17,5 +21,5 @@ async def get(request: web.Request) -> web.Response:
     return await make_response(actions.get, request.app['db'], request.query.get('id'))
 
 
-async def make_response(f, *args, **kwargs):
+async def make_response(f: Callable[[web.Request], Awaitable[Result]], *args, **kwargs):
     return web.json_response(text=str(await f(*args, **kwargs)))

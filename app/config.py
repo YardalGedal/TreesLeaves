@@ -1,3 +1,3 @@
-DB_HOST = '192.168.0.100'
+DB_HOST = 'localhost'
 DB_PORT = 27017
 DB_NAME = 'devhub'
